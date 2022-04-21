@@ -53,6 +53,7 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenContext;
 import org.springframework.security.oauth2.server.authorization.TestOAuth2Authorizations;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientConverter;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.TestRegisteredClients;
 import org.springframework.security.oauth2.server.authorization.config.ClientSettings;
@@ -87,6 +88,7 @@ public class OidcClientRegistrationAuthenticationProviderTests {
 	private RegisteredClientRepository registeredClientRepository;
 	private OAuth2AuthorizationService authorizationService;
 	private JwtEncoder jwtEncoder;
+	private RegisteredClientConverter registeredClientConverter;
 	private OAuth2TokenGenerator<?> tokenGenerator;
 	private ProviderSettings providerSettings;
 	private OidcClientRegistrationAuthenticationProvider authenticationProvider;
@@ -103,10 +105,11 @@ public class OidcClientRegistrationAuthenticationProviderTests {
 				return jwtGenerator.generate(context);
 			}
 		});
+		this.registeredClientConverter = new DefaultRegisteredClientConverter();
 		this.providerSettings = ProviderSettings.builder().issuer("https://provider.com").build();
 		ProviderContextHolder.setProviderContext(new ProviderContext(this.providerSettings, null));
 		this.authenticationProvider = new OidcClientRegistrationAuthenticationProvider(
-				this.registeredClientRepository, this.authorizationService, this.tokenGenerator);
+				this.registeredClientRepository, this.authorizationService, this.tokenGenerator, this.registeredClientConverter);
 	}
 
 	@After
@@ -138,8 +141,15 @@ public class OidcClientRegistrationAuthenticationProviderTests {
 	@Test
 	public void constructorWhenTokenGeneratorNullThenThrowIllegalArgumentException() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> new OidcClientRegistrationAuthenticationProvider(this.registeredClientRepository, this.authorizationService, (OAuth2TokenGenerator<?>) null))
+				.isThrownBy(() -> new OidcClientRegistrationAuthenticationProvider(this.registeredClientRepository, this.authorizationService, (OAuth2TokenGenerator<?>) null, new DefaultRegisteredClientConverter()))
 				.withMessage("tokenGenerator cannot be null");
+	}
+
+	@Test
+	public void constructorWhenRegisteredClientConverterNullThenThrowIllegalArgumentException() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> new OidcClientRegistrationAuthenticationProvider(this.registeredClientRepository, this.authorizationService, this.tokenGenerator, null))
+				.withMessage("registeredClientConverter cannot be null");
 	}
 
 	@Test

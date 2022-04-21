@@ -57,7 +57,8 @@ public final class OidcClientRegistrationEndpointConfigurer extends AbstractOAut
 				new OidcClientRegistrationAuthenticationProvider(
 						OAuth2ConfigurerUtils.getRegisteredClientRepository(builder),
 						OAuth2ConfigurerUtils.getAuthorizationService(builder),
-						OAuth2ConfigurerUtils.getTokenGenerator(builder));
+						OAuth2ConfigurerUtils.getTokenGenerator(builder),
+						OAuth2ConfigurerUtils.getRegisteredClientConverter(builder));
 		builder.authenticationProvider(postProcess(oidcClientRegistrationAuthenticationProvider));
 	}
 

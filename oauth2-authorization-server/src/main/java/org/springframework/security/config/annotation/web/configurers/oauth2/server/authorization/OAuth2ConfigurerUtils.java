@@ -29,6 +29,8 @@ import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwsEncoder;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientConverter;
+import org.springframework.security.oauth2.server.authorization.oidc.authentication.DefaultRegisteredClientConverter;
 import org.springframework.security.oauth2.server.authorization.token.DelegatingOAuth2TokenGenerator;
 import org.springframework.security.oauth2.server.authorization.InMemoryOAuth2AuthorizationConsentService;
 import org.springframework.security.oauth2.server.authorization.InMemoryOAuth2AuthorizationService;
@@ -63,6 +65,18 @@ final class OAuth2ConfigurerUtils {
 			builder.setSharedObject(RegisteredClientRepository.class, registeredClientRepository);
 		}
 		return registeredClientRepository;
+	}
+
+	static <B extends HttpSecurityBuilder<B>> RegisteredClientConverter getRegisteredClientConverter(B builder) {
+		RegisteredClientConverter registeredClientConverter = builder.getSharedObject(RegisteredClientConverter.class);
+		if (registeredClientConverter == null) {
+			registeredClientConverter = getOptionalBean(builder, RegisteredClientConverter.class);
+			if (registeredClientConverter == null) {
+				registeredClientConverter = new DefaultRegisteredClientConverter();
+			}
+			builder.setSharedObject(RegisteredClientConverter.class, registeredClientConverter);
+		}
+		return registeredClientConverter;
 	}
 
 	static <B extends HttpSecurityBuilder<B>> OAuth2AuthorizationService getAuthorizationService(B builder) {
